@@ -742,12 +742,8 @@ footer p{ color: var(--text-muted); font-size:.85rem; }
     <p>Manage categories, photos &amp; videos for the album.</p>
     <form id="loginForm" autocomplete="off">
       <div class="field">
-        <label for="adminEmail">Email</label>
-        <input type="email" id="adminEmail" autocomplete="username" required>
-      </div>
-      <div class="field">
         <label for="adminPassword">Password</label>
-        <input type="password" id="adminPassword" autocomplete="current-password" required>
+        <input type="password" id="adminPassword" autocomplete="current-password" required autofocus>
       </div>
       <p class="admin-error" id="loginError"></p>
       <button class="btn btn-gold" type="submit" style="width:100%;" id="loginSubmitBtn">Sign In</button>
@@ -970,17 +966,16 @@ $("#confirmActionBtn").addEventListener("click", async () => {
    ============================================================ */
 $("#loginForm").addEventListener("submit", async (e) => {
   e.preventDefault();
-  const email = $("#adminEmail").value.trim();
   const password = $("#adminPassword").value;
   const errEl = $("#loginError");
   errEl.textContent = "";
   $("#loginSubmitBtn").textContent = "Signing in…";
   try {
-    await signInWithEmailAndPassword(auth, email, password);
+    await signInWithEmailAndPassword(auth, ADMIN_EMAIL, password);
     // onAuthStateChanged below handles the rest (including the admin-email check)
   } catch (err) {
     console.error(err);
-    errEl.textContent = "Incorrect email or password.";
+    errEl.textContent = "Incorrect password.";
   } finally {
     $("#loginSubmitBtn").textContent = "Sign In";
   }
