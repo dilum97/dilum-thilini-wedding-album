@@ -952,6 +952,64 @@ footer p{ color: var(--text-muted); font-size:.85rem; }
   padding: 1.5rem; font-family: var(--font-display); font-style: italic;
 }
 
+/* =========================================================
+   RATING & FEEDBACK SECTION (home page)
+   ========================================================= */
+.rating-section { padding: 1rem 1.25rem 4.5rem; max-width: 680px; margin: 0 auto; }
+.rating-inner { display: flex; flex-direction: column; gap: 1.4rem; }
+
+.rating-summary {
+  display: flex; gap: 1.5rem; align-items: center; flex-wrap: wrap;
+  background: var(--glass-bg); border: 1px solid var(--glass-border);
+  backdrop-filter: blur(var(--glass-blur)) saturate(var(--glass-saturate));
+  border-radius: var(--radius-md); padding: 1.2rem 1.3rem;
+}
+.rs-score { display: flex; flex-direction: column; align-items: center; gap: .25rem; min-width: 96px; }
+.rs-avg { font-family: var(--font-display); font-size: 2.4rem; line-height: 1; color: var(--text-primary); }
+.rs-stars { display: flex; gap: 2px; }
+.rs-stars svg { width: 15px; height: 15px; fill: var(--color-line); }
+.rs-stars svg.filled { fill: var(--color-gold); }
+.rs-count { font-size: .72rem; color: var(--text-muted); text-align: center; }
+.rs-bars { flex: 1; min-width: 170px; display: flex; flex-direction: column; gap: .35rem; }
+.rs-bar-row { display: flex; align-items: center; gap: .55rem; font-size: .72rem; color: var(--text-muted); }
+.rs-bar-row .rb-label { width: 40px; flex-shrink: 0; }
+.rs-bar-track { flex: 1; height: 6px; border-radius: 4px; background: var(--color-line); overflow: hidden; }
+.rs-bar-fill { height: 100%; width: 0%; border-radius: 4px; background: linear-gradient(90deg, var(--color-gold), var(--color-rose-gold)); transition: width .6s var(--ease); }
+.rs-bar-row .rb-count { width: 20px; text-align: right; flex-shrink: 0; }
+
+.rating-form {
+  background: var(--glass-bg); border: 1px solid var(--glass-border);
+  backdrop-filter: blur(var(--glass-blur)) saturate(var(--glass-saturate));
+  border-radius: var(--radius-md); padding: 1.2rem 1.3rem;
+}
+.rf-row { display: flex; align-items: center; gap: .8rem; margin-bottom: .7rem; }
+.rf-star-input { display: flex; gap: .3rem; }
+.rf-star-input svg {
+  width: 27px; height: 27px; cursor: pointer;
+  fill: none; stroke: var(--color-gold); stroke-width: 1.4;
+  transition: fill .15s var(--ease), transform .15s var(--ease);
+}
+.rf-star-input svg:hover { transform: scale(1.12); }
+.rf-star-input svg.filled { fill: var(--color-gold); }
+#ratingInput {
+  width: 100%; border: none; border-top: 1px solid var(--color-line);
+  background: transparent; resize: none; font-family: var(--font-body);
+  font-size: .9rem; color: var(--text-primary); outline: none;
+  line-height: 1.5; padding: .6rem 0 0; margin-top: .2rem;
+}
+#ratingInput::placeholder { color: var(--text-muted); }
+
+.ratings-list { display: flex; flex-direction: column; gap: .9rem; }
+.rating-card {
+  display: flex; gap: .85rem; align-items: flex-start;
+  background: var(--glass-bg); border: 1px solid var(--color-line);
+  border-radius: var(--radius-sm); padding: .95rem 1.1rem;
+}
+.rc-meta { display: flex; align-items: center; gap: .5rem; flex-wrap: wrap; margin-bottom: .25rem; }
+.rc-stars { display: flex; gap: 1px; }
+.rc-stars svg { width: 12px; height: 12px; fill: var(--color-gold); }
+.rc-stars svg.empty { fill: var(--color-line); }
+
 </style>
 </head>
 <body>
@@ -1059,6 +1117,59 @@ footer p{ color: var(--text-muted); font-size:.85rem; }
       <p class="section-sub">Every chapter of the day, organised so you never miss a memory.</p>
     </div>
     <div class="cat-grid" id="categoryGrid"></div>
+  </section>
+
+  <div class="flourish-divider">
+    <svg viewBox="0 0 340 18"><line x1="0" y1="9" x2="145" y2="9" stroke="var(--color-gold)" stroke-width="1"/><circle cx="170" cy="9" r="4" fill="none" stroke="var(--color-rose-gold)" stroke-width="1.2"/><line x1="195" y1="9" x2="340" y2="9" stroke="var(--color-gold)" stroke-width="1"/></svg>
+  </div>
+
+  <!-- ============ RATE & FEEDBACK ============ -->
+  <section class="rating-section" id="ratingSection">
+    <div class="section-head">
+      <p class="eyebrow">Give Us Your Feedback</p>
+      <h2 class="section-title">Rate Our Album</h2>
+      <p class="section-sub">Enjoyed browsing through our memories? Let us know what you think 🤍</p>
+    </div>
+
+    <div class="rating-inner">
+      <!-- Summary -->
+      <div class="rating-summary" id="ratingSummary">
+        <div class="rs-score">
+          <span class="rs-avg" id="rsAvg">–</span>
+          <div class="rs-stars" id="rsAvgStars"></div>
+          <span class="rs-count" id="rsCount">No ratings yet</span>
+        </div>
+        <div class="rs-bars" id="rsBars"></div>
+      </div>
+
+      <!-- Rate form -->
+      <div class="rating-form" id="ratingForm">
+        <div id="rfSignedIn" style="display:none;">
+          <div class="rf-row">
+            <img id="rfAvatar" src="" alt="" class="cf-avatar">
+            <div class="rf-star-input" id="rfStarInput"></div>
+          </div>
+          <textarea id="ratingInput" placeholder="A few words about the album… (optional)" maxlength="300" rows="2"></textarea>
+          <div class="cf-actions">
+            <span id="rfCharCount" class="cf-char">0 / 300</span>
+            <button class="btn btn-gold btn-sm" id="ratingSubmitBtn">Submit</button>
+          </div>
+        </div>
+        <div id="rfSignedOut" class="cf-signin-prompt">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" style="width:22px;height:22px;color:var(--color-rose-gold)"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87L18.18 21 12 17.77 5.82 21 7 14.14l-5-4.87 6.91-1.01L12 2z"/></svg>
+          <p>Sign in with Google to rate the album.</p>
+          <button class="btn btn-google btn-sm" id="ratingSignInBtn">
+            <img src="https://www.gstatic.com/firebasejs/ui/2.0.0/images/auth/google.svg" alt="" style="width:16px;height:16px">
+            Sign in
+          </button>
+        </div>
+      </div>
+
+      <!-- Written feedback list -->
+      <div class="ratings-list" id="ratingsList">
+        <div class="comment-loading">Loading feedback…</div>
+      </div>
+    </div>
   </section>
 </main>
 
@@ -1212,7 +1323,9 @@ const state = {
   user: null,
   slideshowTimer: null,
   slideshowOrder: [],
-  slideshowPos: 0
+  slideshowPos: 0,
+  ratings: [],               // [{id,uid,displayName,photoURL,stars,feedback,updatedAt}]
+  myRatingValue: 0
 };
 
 const $ = (sel, root = document) => root.querySelector(sel);
@@ -1236,6 +1349,21 @@ function cldDownload(url) {
 function cldVideoPoster(url) {
   if (!url || !url.includes("/upload/")) return "";
   return url.replace("/upload/", "/upload/so_0,c_fill,w_420/").replace(/\.[a-zA-Z0-9]+$/, ".jpg");
+}
+
+/* ============================================================
+   STAR ICON HELPER
+   ============================================================ */
+const STAR_PATH = "M12 2l3.09 6.26L22 9.27l-5 4.87L18.18 21 12 17.77 5.82 21 7 14.14l-5-4.87 6.91-1.01L12 2z";
+function starSvg(cls = "") {
+  return `<svg viewBox="0 0 24 24" class="${cls}"><path d="${STAR_PATH}"/></svg>`;
+}
+function renderStarInput(value = 0) {
+  const wrap = $("#rfStarInput");
+  if (!wrap) return;
+  wrap.innerHTML = [1, 2, 3, 4, 5].map(i =>
+    `<svg viewBox="0 0 24 24" data-value="${i}" class="${i <= value ? "filled" : ""}"><path d="${STAR_PATH}"/></svg>`
+  ).join("");
 }
 
 /* ============================================================
@@ -1403,6 +1531,7 @@ onAuthStateChanged(auth, async (user) => {
 
     renderSpAccount();
     updateCommentFormAuth();
+    updateRatingFormAuth();
     if (state.pendingDownload) {
       const item = state.pendingDownload;
       state.pendingDownload = null;
@@ -1412,6 +1541,7 @@ onAuthStateChanged(auth, async (user) => {
   } else {
     renderSpAccount();
     updateCommentFormAuth();
+    updateRatingFormAuth();
   }
 });
 
@@ -2093,6 +2223,145 @@ $("#commentSignInBtn")?.addEventListener("click", async () => {
   try { await signInWithPopup(auth, googleProvider); } catch {}
 });
 
+/* ============================================================
+   RATING & FEEDBACK (home page)
+   ============================================================ */
+function listenRatings() {
+  const list = $("#ratingsList");
+  onSnapshot(
+    query(collection(db, "ratings"), orderBy("updatedAt", "desc")),
+    (snap) => {
+      state.ratings = snap.docs.map(d => ({ id: d.id, ...d.data() }));
+      renderRatingSummary();
+      renderRatingsList();
+      updateRatingFormAuth(); // keep the form's pre-filled value synced once ratings arrive
+    },
+    (err) => {
+      console.error("ratings listener error", err);
+      if (list) list.innerHTML = '<p class="comment-empty">Couldn\'t load feedback right now.</p>';
+    }
+  );
+}
+
+function renderRatingSummary() {
+  const ratings = state.ratings;
+  const total = ratings.length;
+  const counts = { 5: 0, 4: 0, 3: 0, 2: 0, 1: 0 };
+  ratings.forEach(r => { if (counts[r.stars] !== undefined) counts[r.stars]++; });
+  const avg = total ? ratings.reduce((s, r) => s + (r.stars || 0), 0) / total : 0;
+
+  const avgEl = $("#rsAvg"), starsEl = $("#rsAvgStars"), countEl = $("#rsCount"), barsEl = $("#rsBars");
+  if (avgEl) avgEl.textContent = total ? avg.toFixed(1) : "–";
+  if (starsEl) starsEl.innerHTML = [1, 2, 3, 4, 5].map(i => starSvg(i <= Math.round(avg) ? "filled" : "")).join("");
+  if (countEl) countEl.textContent = total ? `${total} rating${total === 1 ? "" : "s"}` : "No ratings yet";
+  if (barsEl) {
+    barsEl.innerHTML = [5, 4, 3, 2, 1].map(n => {
+      const c = counts[n];
+      const pct = total ? Math.round((c / total) * 100) : 0;
+      return `<div class="rs-bar-row"><span class="rb-label">${n} star</span><div class="rs-bar-track"><div class="rs-bar-fill" style="width:${pct}%"></div></div><span class="rb-count">${c}</span></div>`;
+    }).join("");
+  }
+}
+
+function renderRatingsList() {
+  const list = $("#ratingsList");
+  if (!list) return;
+  const withFeedback = state.ratings.filter(r => r.feedback && r.feedback.trim());
+  if (!withFeedback.length) {
+    list.innerHTML = '<p class="comment-empty">No written feedback yet — be the first to share yours 🤍</p>';
+    return;
+  }
+  list.innerHTML = withFeedback.map(r => {
+    const ago = timeAgo(r.updatedAt?.toDate?.() || new Date());
+    return `
+      <div class="rating-card">
+        <img class="comment-avatar" src="${r.photoURL || 'https://ui-avatars.com/api/?name=' + encodeURIComponent(r.displayName || '?') + '&background=D49AA3&color=fff'}" alt="${escapeHtml(r.displayName || '')}">
+        <div class="comment-body">
+          <div class="rc-meta">
+            <span class="comment-name">${escapeHtml(r.displayName || 'Someone')}</span>
+            <div class="rc-stars">${[1, 2, 3, 4, 5].map(i => starSvg(i <= r.stars ? "" : "empty")).join("")}</div>
+            <span class="comment-time">${ago}</span>
+          </div>
+          <p class="comment-text">${escapeHtml(r.feedback)}</p>
+        </div>
+      </div>`;
+  }).join("");
+}
+
+function updateRatingFormAuth() {
+  const signedIn = $("#rfSignedIn");
+  const signedOut = $("#rfSignedOut");
+  if (!signedIn || !signedOut) return;
+  if (state.user) {
+    signedIn.style.display = "block";
+    signedOut.style.display = "none";
+    const av = $("#rfAvatar");
+    if (av) { av.src = state.user.photoURL || ''; av.alt = state.user.displayName || ''; }
+
+    const mine = state.ratings.find(r => r.uid === state.user.uid);
+    state.myRatingValue = mine ? mine.stars : 0;
+    renderStarInput(state.myRatingValue);
+
+    const ri = $("#ratingInput");
+    if (ri && document.activeElement !== ri) {
+      ri.value = mine?.feedback || "";
+      const cc = $("#rfCharCount");
+      if (cc) cc.textContent = ri.value.length + " / 300";
+    }
+    const btn = $("#ratingSubmitBtn");
+    if (btn) btn.textContent = mine ? "Update" : "Submit";
+  } else {
+    signedIn.style.display = "none";
+    signedOut.style.display = "flex";
+  }
+}
+
+// Star picker
+$("#rfStarInput")?.addEventListener("click", (e) => {
+  const svg = e.target.closest("svg[data-value]");
+  if (!svg) return;
+  state.myRatingValue = parseInt(svg.dataset.value, 10);
+  renderStarInput(state.myRatingValue);
+});
+
+// Character counter
+$("#ratingInput")?.addEventListener("input", function () {
+  const n = this.value.length;
+  const cc = $("#rfCharCount");
+  if (cc) cc.textContent = n + " / 300";
+});
+
+// Submit / update rating
+$("#ratingSubmitBtn")?.addEventListener("click", async () => {
+  if (!state.user) return;
+  if (!state.myRatingValue) { toast("Please pick a star rating first"); return; }
+
+  const btn = $("#ratingSubmitBtn");
+  btn.textContent = "Submitting…";
+  btn.disabled = true;
+  try {
+    await setDoc(doc(db, "ratings", state.user.uid), {
+      uid: state.user.uid,
+      displayName: state.user.displayName || state.user.email || "Guest",
+      photoURL: state.user.photoURL || "",
+      stars: state.myRatingValue,
+      feedback: $("#ratingInput")?.value.trim() || "",
+      updatedAt: serverTimestamp()
+    }, { merge: true });
+    toast("Thank you for your feedback 🤍");
+  } catch (e) {
+    console.error(e);
+    toast("Couldn't submit — please try again");
+  } finally {
+    btn.disabled = false;
+  }
+});
+
+// Sign in from rating form
+$("#ratingSignInBtn")?.addEventListener("click", async () => {
+  try { await signInWithPopup(auth, googleProvider); } catch {}
+});
+
 function timeAgo(date) {
   if (!date) return "";
   const s = Math.floor((Date.now() - date.getTime()) / 1000);
@@ -2108,6 +2377,7 @@ function timeAgo(date) {
    ============================================================ */
 listenCategories();
 listenAllPhotos();
+listenRatings();
 route();
 
 </script>
