@@ -44,6 +44,7 @@
   --glass-bg-strong:    rgba(255,255,255,0.78);
   --glass-border:       rgba(201,162,75,0.35);
   --glass-blur:         14px;
+  --glass-saturate:     1.05;
 
   /* ---- Surfaces (re-themed for dark mode) ---- */
   --bg-page:            var(--color-cream);
@@ -68,20 +69,42 @@
 }
 
 [data-theme="dark"]{
-  --bg-page:        #000000;
-  --bg-elevated:     #000000;
-  --color-cream:     #2A201D;
-  --color-cream-deep:#322522;
-  --text-primary:    #F4ECE0;
-  --text-muted:      #C9BDB6;
-  --color-ink:        #F4ECE0;
-  --color-ink-soft:   #C9BDB6;
-  --color-line:       rgba(244,236,224,0.12);
-  --glass-bg:         rgba(46,34,32,0.55);
-  --glass-bg-strong:  rgba(46,34,32,0.82);
-  --glass-border:     rgba(201,162,75,0.3);
-  --shadow-soft: 0 10px 35px rgba(0,0,0,0.35);
-  --shadow-deep: 0 25px 60px rgba(0,0,0,0.5);
+  /* Jewel-tone night palette: deep aubergine base, rose + violet + gold glass */
+  --bg-page:          #150D1A;
+  --bg-elevated:       #1E1424;
+  --color-cream:       #241726;
+  --color-cream-deep:  #2C1A2C;
+  --color-gold:        #E8C468;
+  --color-gold-light:  #F5DFA0;
+  --color-gold-deep:   #C9A24B;
+  --color-rose-gold:   #E88BA0;
+  --color-rose-gold-lt:#F0AFC0;
+  --color-soft-pink:   #3A2038;
+  --color-violet:      #9B7FE0;
+  --text-primary:      #F6ECEA;
+  --text-muted:        #C9AFCB;
+  --color-ink:         #F6ECEA;
+  --color-ink-soft:    #C9AFCB;
+  --color-line:        rgba(232,196,104,0.16);
+  --glass-bg:          rgba(72,42,80,0.42);
+  --glass-bg-strong:   rgba(52,28,58,0.72);
+  --glass-border:      rgba(232,196,104,0.32);
+  --shadow-soft: 0 10px 35px rgba(20,6,24,0.45);
+  --shadow-deep: 0 25px 70px rgba(139,46,90,0.35);
+  --mesh-1: rgba(233,139,160,0.28);
+  --mesh-2: rgba(155,127,224,0.26);
+  --mesh-3: rgba(232,196,104,0.20);
+  --glass-blur: 18px;
+  --glass-saturate: 1.7;
+}
+
+[data-theme="dark"] body{
+  background:
+    radial-gradient(ellipse 620px 480px at 8% 4%, var(--mesh-1), transparent 60%),
+    radial-gradient(ellipse 560px 520px at 96% 18%, var(--mesh-2), transparent 60%),
+    radial-gradient(ellipse 700px 600px at 50% 92%, var(--mesh-3), transparent 60%),
+    var(--bg-page);
+  background-attachment: fixed;
 }
 
 *{ margin:0; padding:0; box-sizing:border-box; }
@@ -186,8 +209,8 @@ ul{ list-style:none; }
 }
 #topbar.scrolled{
   background: var(--glass-bg-strong);
-  backdrop-filter: blur(var(--glass-blur));
-  -webkit-backdrop-filter: blur(var(--glass-blur));
+  backdrop-filter: blur(var(--glass-blur)) saturate(var(--glass-saturate));
+  -webkit-backdrop-filter: blur(var(--glass-blur)) saturate(var(--glass-saturate));
   box-shadow: var(--shadow-soft);
   border-bottom: 1px solid var(--glass-border);
   height: 64px;
@@ -200,8 +223,8 @@ ul{ list-style:none; }
   display:flex; align-items:center; justify-content:center;
   background: var(--glass-bg);
   border:1px solid var(--glass-border);
-  backdrop-filter: blur(var(--glass-blur));
-  -webkit-backdrop-filter: blur(var(--glass-blur));
+  backdrop-filter: blur(var(--glass-blur)) saturate(var(--glass-saturate));
+  -webkit-backdrop-filter: blur(var(--glass-blur)) saturate(var(--glass-saturate));
   transition: transform .25s var(--ease), background .25s var(--ease);
   color: var(--text-primary);
 }
@@ -214,10 +237,117 @@ ul{ list-style:none; }
   border-radius:999px;
   background: var(--glass-bg);
   border:1px solid var(--glass-border);
-  backdrop-filter: blur(var(--glass-blur));
+  backdrop-filter: blur(var(--glass-blur)) saturate(var(--glass-saturate));
   font-size:.82rem;
 }
 .user-chip img{ width:28px; height:28px; border-radius:50%; }
+
+/* ---------- Hamburger menu button (replaces the D&T logo) ---------- */
+.menu-lines{
+  position:relative; width:40px; height:40px; border-radius:50%; flex-shrink:0;
+  background: var(--glass-bg); border:1px solid var(--glass-border);
+  backdrop-filter: blur(var(--glass-blur)) saturate(var(--glass-saturate));
+  -webkit-backdrop-filter: blur(var(--glass-blur)) saturate(var(--glass-saturate));
+  transition: transform .25s var(--ease), background .25s var(--ease);
+}
+.brand:hover .menu-lines{ transform: translateY(-2px); background: var(--color-soft-pink); }
+.menu-lines span{
+  position:absolute; left:50%; top:50%; width:16px; height:1.6px; border-radius:2px;
+  background: var(--color-gold);
+  transform: translate(-50%,-50%) translateY(var(--ty,0)) rotate(0deg);
+  transition: transform .35s var(--ease), opacity .25s var(--ease);
+}
+.menu-lines span:nth-child(1){ --ty:-5px; }
+.menu-lines span:nth-child(2){ --ty:0px; }
+.menu-lines span:nth-child(3){ --ty:5px; }
+#menuToggle.open .menu-lines span:nth-child(1){ transform: translate(-50%,-50%) rotate(45deg); }
+#menuToggle.open .menu-lines span:nth-child(2){ opacity:0; }
+#menuToggle.open .menu-lines span:nth-child(3){ transform: translate(-50%,-50%) rotate(-45deg); }
+
+/* ---------- Side panel ---------- */
+.panel-overlay{
+  position:fixed; inset:0; z-index:900;
+  background: rgba(10,6,12,.5);
+  backdrop-filter: blur(3px); -webkit-backdrop-filter: blur(3px);
+  opacity:0; visibility:hidden;
+  transition: opacity .35s var(--ease), visibility .35s var(--ease);
+}
+.panel-overlay.open{ opacity:1; visibility:visible; }
+
+.side-panel{
+  position:fixed; top:0; left:0; bottom:0; z-index:950;
+  width:min(84vw, 320px);
+  background: var(--glass-bg-strong);
+  border-right:1px solid var(--glass-border);
+  backdrop-filter: blur(var(--glass-blur)) saturate(var(--glass-saturate));
+  -webkit-backdrop-filter: blur(var(--glass-blur)) saturate(var(--glass-saturate));
+  box-shadow: var(--shadow-deep);
+  transform: translateX(-104%);
+  transition: transform .45s var(--ease);
+  display:flex; flex-direction:column;
+  padding: 1.5rem 1.2rem calc(1.4rem + env(safe-area-inset-bottom));
+  overflow-y:auto;
+}
+.side-panel.open{ transform: translateX(0); }
+
+.sp-header{
+  display:flex; align-items:center; gap:.8rem;
+  padding-bottom:1.2rem; margin-bottom:1.2rem;
+  border-bottom:1px solid var(--color-line);
+}
+.sp-title{ flex:1; display:flex; flex-direction:column; min-width:0; }
+.sp-title strong{ font-family:var(--font-display); font-style:italic; font-weight:500; font-size:1.15rem; }
+.sp-title span{ font-size:.7rem; color:var(--text-muted); letter-spacing:.05em; }
+.sp-close{ flex-shrink:0; width:34px; height:34px; }
+.sp-close svg{ width:15px; height:15px; }
+
+.sp-section{ margin-bottom:1.2rem; }
+
+.sp-account{
+  display:flex; align-items:center; gap:.7rem;
+  padding: .8rem .9rem; border-radius: var(--radius-md);
+  background: var(--glass-bg); border:1px solid var(--glass-border);
+}
+.sp-account.signed-out{ flex-direction:column; align-items:stretch; text-align:center; gap:.7rem; }
+.sp-account .sp-avatar{ width:38px; height:38px; border-radius:50%; object-fit:cover; flex-shrink:0; }
+.sp-account .sp-user-info{ flex:1; min-width:0; }
+.sp-account .sp-user-name{ font-size:.88rem; font-weight:500; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
+.sp-account .sp-user-email{ font-size:.72rem; color:var(--text-muted); overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
+.sp-account .sp-signout{ font-size:.72rem; color:var(--color-rose-gold); flex-shrink:0; padding:.3rem .6rem; }
+.sp-account-hint{ font-size:.82rem; color:var(--text-muted); }
+
+.sp-nav{ display:flex; flex-direction:column; gap:.2rem; margin-bottom:1.2rem; }
+.sp-link{
+  display:flex; align-items:center; gap:.85rem; width:100%; text-align:left;
+  padding:.7rem .6rem; border-radius:12px; font-size:.88rem; color:var(--text-primary);
+  transition: background .2s;
+}
+.sp-link svg{ width:18px; height:18px; color: var(--color-rose-gold); flex-shrink:0; }
+.sp-link:hover{ background: var(--glass-bg); }
+
+.sp-theme-row{
+  display:flex; align-items:center; justify-content:space-between; gap:.8rem;
+  padding: .8rem .9rem; border-radius: var(--radius-md);
+  background: var(--glass-bg); border:1px solid var(--glass-border);
+}
+.sp-theme-label{ display:flex; align-items:center; gap:.7rem; font-size:.88rem; }
+.sp-theme-label svg{ width:18px; height:18px; color: var(--color-gold); flex-shrink:0; }
+
+.sp-switch{
+  position:relative; width:44px; height:24px; border-radius:999px; flex-shrink:0;
+  background: var(--color-line);
+  transition: background .3s var(--ease);
+}
+.sp-switch .sp-switch-knob{
+  position:absolute; top:2px; left:2px; width:20px; height:20px; border-radius:50%;
+  background:#fff; box-shadow: 0 2px 6px rgba(0,0,0,.25);
+  transition: transform .3s var(--ease);
+}
+.sp-switch.on{ background: linear-gradient(120deg, var(--color-gold-light), var(--color-rose-gold)); }
+.sp-switch.on .sp-switch-knob{ transform: translateX(20px); }
+
+.sp-footer{ margin-top:auto; padding-top:1rem; border-top:1px solid var(--color-line); text-align:center; }
+.sp-footer p{ font-size:.72rem; color:var(--text-muted); font-family:var(--font-display); font-style:italic; }
 
 /* ---------- Hero ---------- */
 .hero{
@@ -294,7 +424,7 @@ ul{ list-style:none; }
 .search-box{
   width:100%; max-width:420px; display:flex; align-items:center; gap:.6rem;
   background: var(--glass-bg); border:1px solid var(--glass-border);
-  backdrop-filter: blur(var(--glass-blur)); -webkit-backdrop-filter: blur(var(--glass-blur));
+  backdrop-filter: blur(var(--glass-blur)) saturate(var(--glass-saturate)); -webkit-backdrop-filter: blur(var(--glass-blur)) saturate(var(--glass-saturate));
   border-radius: 999px; padding: .7rem 1.2rem; box-shadow: var(--shadow-soft);
 }
 .search-box svg{ width:17px; height:17px; flex-shrink:0; color: var(--color-rose-gold); }
@@ -317,6 +447,8 @@ ul{ list-style:none; }
   transition: transform .45s var(--ease), box-shadow .45s var(--ease);
 }
 .cat-card:hover{ transform: translateY(-6px); box-shadow: var(--shadow-deep); }
+[data-theme="dark"] .cat-card{ border:1px solid rgba(232,196,104,0.18); }
+[data-theme="dark"] .cat-card:hover{ box-shadow: 0 20px 55px rgba(155,127,224,0.35), 0 8px 24px rgba(232,196,104,0.18); }
 .cat-card .cat-bg{
   position:absolute; inset:0; background-size:cover; background-position:center;
   background-color: var(--color-soft-pink);
@@ -476,8 +608,8 @@ ul{ list-style:none; }
 .modal-overlay.open{ opacity:1; visibility:visible; }
 .modal-card{
   width:100%; max-width:380px; background: var(--glass-bg-strong);
-  border:1px solid var(--glass-border); backdrop-filter: blur(var(--glass-blur));
-  -webkit-backdrop-filter: blur(var(--glass-blur));
+  border:1px solid var(--glass-border); backdrop-filter: blur(var(--glass-blur)) saturate(var(--glass-saturate));
+  -webkit-backdrop-filter: blur(var(--glass-blur)) saturate(var(--glass-saturate));
   border-radius: var(--radius-lg); padding: 2.2rem 1.8rem; text-align:center;
   box-shadow: var(--shadow-deep); transform: translateY(14px) scale(.97);
   transition: transform .35s var(--ease);
@@ -533,7 +665,7 @@ footer p{ color: var(--text-muted); font-size:.85rem; }
   position:fixed; bottom:22px; right:18px; z-index:400;
   width:46px; height:46px; border-radius:50%;
   background: var(--glass-bg-strong); border:1px solid var(--glass-border);
-  backdrop-filter: blur(var(--glass-blur)); box-shadow: var(--shadow-soft);
+  backdrop-filter: blur(var(--glass-blur)) saturate(var(--glass-saturate)); box-shadow: var(--shadow-soft);
   display:flex; align-items:center; justify-content:center;
   opacity:0; visibility:hidden; transform: translateY(10px);
   transition: opacity .3s, visibility .3s, transform .3s;
@@ -561,7 +693,7 @@ footer p{ color: var(--text-muted); font-size:.85rem; }
 }
 .admin-login-card{
   width:100%; max-width:380px; background: var(--glass-bg-strong);
-  border:1px solid var(--glass-border); backdrop-filter: blur(var(--glass-blur));
+  border:1px solid var(--glass-border); backdrop-filter: blur(var(--glass-blur)) saturate(var(--glass-saturate));
   border-radius: var(--radius-lg); padding: 2.4rem 2rem; text-align:center; box-shadow: var(--shadow-deep);
 }
 .admin-login-card h1{ font-family:var(--font-display); font-style:italic; font-size:1.7rem; margin: .8rem 0 .3rem; }
@@ -580,7 +712,7 @@ footer p{ color: var(--text-muted); font-size:.85rem; }
 .admin-shell.active{ display:block; }
 .admin-topbar{
   position:sticky; top:0; z-index:200; display:flex; align-items:center; justify-content:space-between;
-  padding: .9rem 1.4rem; background: var(--glass-bg-strong); backdrop-filter: blur(var(--glass-blur));
+  padding: .9rem 1.4rem; background: var(--glass-bg-strong); backdrop-filter: blur(var(--glass-blur)) saturate(var(--glass-saturate));
   border-bottom:1px solid var(--glass-border);
 }
 .admin-main{ max-width:1100px; margin:0 auto; padding: 1.6rem 1.2rem 4rem; }
@@ -588,7 +720,7 @@ footer p{ color: var(--text-muted); font-size:.85rem; }
 .stat-grid{ display:grid; grid-template-columns: repeat(2,1fr); gap:.8rem; margin-bottom:1.8rem; }
 @media (min-width:700px){ .stat-grid{ grid-template-columns: repeat(4,1fr); } }
 .stat-card{
-  background: var(--glass-bg); border:1px solid var(--glass-border); backdrop-filter: blur(var(--glass-blur));
+  background: var(--glass-bg); border:1px solid var(--glass-border); backdrop-filter: blur(var(--glass-blur)) saturate(var(--glass-saturate));
   border-radius: var(--radius-md); padding: 1.1rem 1.2rem; box-shadow: var(--shadow-soft);
 }
 .stat-card .stat-num{ font-family:var(--font-display); font-size:1.9rem; font-weight:600; color: var(--color-rose-gold); }
@@ -771,7 +903,7 @@ footer p{ color: var(--text-muted); font-size:.85rem; }
 .comment-form {
   background: var(--glass-bg);
   border: 1px solid var(--glass-border);
-  backdrop-filter: blur(var(--glass-blur));
+  backdrop-filter: blur(var(--glass-blur)) saturate(var(--glass-saturate));
   border-radius: var(--radius-md);
   padding: 1.2rem 1.3rem;
 }
@@ -836,17 +968,59 @@ footer p{ color: var(--text-muted); font-size:.85rem; }
 
 <!-- ============ TOPBAR ============ -->
 <header id="topbar">
-  <div class="brand">
-    <span class="monogram" style="width:34px;height:34px;color:var(--color-gold)">
+  <button class="brand" id="menuToggle" aria-label="Open menu" aria-expanded="false" aria-controls="sidePanel">
+    <span class="menu-lines"><span></span><span></span><span></span></span>
+    <span>Dilum &amp; Thilini</span>
+  </button>
+</header>
+
+<!-- ============ SIDE PANEL ============ -->
+<div class="panel-overlay" id="panelOverlay"></div>
+<aside class="side-panel" id="sidePanel" aria-hidden="true">
+  <div class="sp-header">
+    <span class="monogram" style="width:42px;height:42px;color:var(--color-gold)">
       <svg viewBox="0 0 64 64"><circle cx="32" cy="32" r="29" fill="none" stroke="currentColor" stroke-width="1" opacity=".5"/><text x="32" y="40" text-anchor="middle" font-family="Cormorant Garamond, serif" font-style="italic" font-size="24" fill="currentColor">D&amp;T</text></svg>
     </span>
-    <span>Dilum &amp; Thilini</span>
+    <div class="sp-title">
+      <strong>Dilum &amp; Thilini</strong>
+      <span>Our Wedding Album</span>
+    </div>
+    <button class="icon-btn sp-close" id="panelClose" aria-label="Close menu">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M6 6l12 12M18 6L6 18"/></svg>
+    </button>
   </div>
-  <div class="topbar-actions">
-    <button class="icon-btn" id="themeToggle" aria-label="Toggle dark mode"></button>
-    <div id="userChip" class="icon-btn" tabindex="0" role="button" aria-label="Account"></div>
+
+  <div class="sp-section sp-account" id="spAccount"></div>
+
+  <nav class="sp-nav">
+    <button class="sp-link" id="spHome">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M3 11l9-8 9 8"/><path d="M5 10v10h14V10"/></svg>
+      Home
+    </button>
+    <button class="sp-link" id="spShare">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><circle cx="18" cy="5" r="2.4"/><circle cx="6" cy="12" r="2.4"/><circle cx="18" cy="19" r="2.4"/><path d="M8.1 10.7l7.8-4.4M8.1 13.3l7.8 4.4"/></svg>
+      Share album
+    </button>
+    <button class="sp-link" id="spScrollTop">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M12 19V5M5 12l7-7 7 7"/></svg>
+      Back to top
+    </button>
+  </nav>
+
+  <div class="sp-section sp-theme-row">
+    <div class="sp-theme-label">
+      <span id="spThemeIcon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M21 12.6A9 9 0 1 1 11.4 3a7 7 0 0 0 9.6 9.6z"/></svg></span>
+      <span id="spThemeText">Dark mode</span>
+    </div>
+    <button class="sp-switch" id="spThemeSwitch" role="switch" aria-checked="false" aria-label="Toggle dark mode">
+      <span class="sp-switch-knob"></span>
+    </button>
   </div>
-</header>
+
+  <div class="sp-footer">
+    <p>Made with love, our story lives here 🤍</p>
+  </div>
+</aside>
 
 <!-- ============ HOME VIEW ============ -->
 <main id="homeView" class="view active">
@@ -1116,30 +1290,109 @@ window.addEventListener("scroll", () => {
 $("#scrollTop").addEventListener("click", () => window.scrollTo({ top: 0, behavior: "smooth" }));
 $("#scrollTop").innerHTML = ICONS.up;
 
+/* ============================================================
+   SIDE PANEL (hamburger menu)
+   ============================================================ */
+function openPanel() {
+  $("#panelOverlay").classList.add("open");
+  $("#sidePanel").classList.add("open");
+  $("#sidePanel").setAttribute("aria-hidden", "false");
+  $("#menuToggle").classList.add("open");
+  $("#menuToggle").setAttribute("aria-expanded", "true");
+  document.body.style.overflow = "hidden";
+}
+function closePanel() {
+  $("#panelOverlay").classList.remove("open");
+  $("#sidePanel").classList.remove("open");
+  $("#sidePanel").setAttribute("aria-hidden", "true");
+  $("#menuToggle").classList.remove("open");
+  $("#menuToggle").setAttribute("aria-expanded", "false");
+  document.body.style.overflow = "";
+}
+$("#menuToggle").addEventListener("click", () => {
+  $("#sidePanel").classList.contains("open") ? closePanel() : openPanel();
+});
+$("#panelClose").addEventListener("click", closePanel);
+$("#panelOverlay").addEventListener("click", closePanel);
+document.addEventListener("keydown", (e) => {
+  if (e.key === "Escape" && $("#sidePanel").classList.contains("open")) closePanel();
+});
+
+$("#spHome").addEventListener("click", () => { closePanel(); navigateHome(); });
+$("#spScrollTop").addEventListener("click", () => {
+  closePanel();
+  window.scrollTo({ top: 0, behavior: "smooth" });
+});
+$("#spShare").addEventListener("click", () => {
+  closePanel();
+  $("[data-share]")?.click();
+});
+
+/* ============================================================
+   THEME (switch now lives in the side panel)
+   ============================================================ */
 function applyTheme(theme) {
   document.documentElement.setAttribute("data-theme", theme);
   localStorage.setItem("dt-theme", theme);
-  const icon = theme === "dark" ? "sun" : "moon";
-  $("#themeToggle").innerHTML = ICONS[icon];
+  const isDark = theme === "dark";
+  const sw = $("#spThemeSwitch");
+  if (sw) {
+    sw.classList.toggle("on", isDark);
+    sw.setAttribute("aria-checked", String(isDark));
+  }
+  const icon = $("#spThemeIcon");
+  if (icon) icon.innerHTML = isDark ? ICONS.sun : ICONS.moon;
+  const label = $("#spThemeText");
+  if (label) label.textContent = isDark ? "Dark mode" : "Light mode";
 }
-$("#themeToggle").addEventListener("click", () => {
+$("#spThemeSwitch").addEventListener("click", () => {
   const cur = document.documentElement.getAttribute("data-theme") === "dark" ? "light" : "dark";
   applyTheme(cur);
 });
-applyTheme(localStorage.getItem("dt-theme") || "light");
+applyTheme(localStorage.getItem("dt-theme") || "dark");
 
 /* ============================================================
-   AUTH
+   AUTH (account card + Google sign-in now live in the side panel)
    ============================================================ */
+function renderSpAccount() {
+  const box = $("#spAccount");
+  if (!box) return;
+  const user = state.user;
+  if (user) {
+    box.classList.remove("signed-out");
+    box.innerHTML = `
+      <img class="sp-avatar" src="${user.photoURL || ''}" alt="" referrerpolicy="no-referrer">
+      <div class="sp-user-info">
+        <div class="sp-user-name">${escapeHtml(user.displayName || user.email || 'You')}</div>
+        <div class="sp-user-email">${escapeHtml(user.email || '')}</div>
+      </div>
+      <button class="sp-signout" id="spSignOutBtn">Sign out</button>`;
+    $("#spSignOutBtn")?.addEventListener("click", () => {
+      if (confirm("Sign out of your Google account?")) signOut(auth).then(() => toast("Signed out"));
+    });
+  } else {
+    box.classList.add("signed-out");
+    box.innerHTML = `
+      <p class="sp-account-hint">Sign in with Google to comment and download photos.</p>
+      <button class="btn btn-google btn-sm" id="spGoogleSignInBtn">
+        <img src="https://www.gstatic.com/firebasejs/ui/2.0.0/images/auth/google.svg" alt="" style="width:16px;height:16px">
+        Continue with Google
+      </button>`;
+    $("#spGoogleSignInBtn")?.addEventListener("click", async () => {
+      try {
+        await signInWithPopup(auth, googleProvider);
+        toast("Welcome! 🤍");
+      } catch (err) {
+        console.error(err);
+        toast("Sign-in was cancelled or failed");
+      }
+    });
+  }
+}
+
 onAuthStateChanged(auth, async (user) => {
   state.user = user;
-  const chip = $("#userChip");
   if (user) {
-    chip.innerHTML = `
-      <img src="${user.photoURL || ''}" alt="${user.displayName || 'You'}" referrerpolicy="no-referrer">
-      <span>${(user.displayName || user.email || '').split(" ")[0]}</span>`;
-    chip.classList.remove("icon-btn");
-    chip.classList.add("user-chip");
     try {
       await setDoc(doc(db, "users", user.uid), {
         uid: user.uid,
@@ -1148,6 +1401,7 @@ onAuthStateChanged(auth, async (user) => {
       }, { merge: true });
     } catch (e) { /* non-fatal */ }
 
+    renderSpAccount();
     updateCommentFormAuth();
     if (state.pendingDownload) {
       const item = state.pendingDownload;
@@ -1156,18 +1410,8 @@ onAuthStateChanged(auth, async (user) => {
       performDownload(item);
     }
   } else {
-    chip.innerHTML = ICONS.person;
-    chip.classList.remove("user-chip");
-    chip.classList.add("icon-btn");
+    renderSpAccount();
     updateCommentFormAuth();
-  }
-});
-
-$("#userChip").addEventListener("click", (e) => {
-  if (state.user) {
-    if (confirm("Sign out of your Google account?")) signOut(auth).then(() => toast("Signed out"));
-  } else {
-    openModal("#loginModal");
   }
 });
 
