@@ -999,16 +999,44 @@ footer p{ color: var(--text-muted); font-size:.85rem; }
 }
 #ratingInput::placeholder { color: var(--text-muted); }
 
+.rf-done { display: flex; gap: .8rem; align-items: flex-start; }
+.rf-done-body { flex: 1; min-width: 0; }
+.rf-done-body .rc-stars svg { width: 16px; height: 16px; }
+.rf-done-hint { font-size: .84rem; color: var(--text-muted); margin-top: .4rem; line-height: 1.5; }
+
 .ratings-list { display: flex; flex-direction: column; gap: .9rem; }
 .rating-card {
+  position: relative;
   display: flex; gap: .85rem; align-items: flex-start;
   background: var(--glass-bg); border: 1px solid var(--color-line);
   border-radius: var(--radius-sm); padding: .95rem 1.1rem;
 }
-.rc-meta { display: flex; align-items: center; gap: .5rem; flex-wrap: wrap; margin-bottom: .25rem; }
+.rc-meta { display: flex; align-items: center; gap: .5rem; flex-wrap: wrap; margin-bottom: .25rem; padding-right: 1.6rem; }
 .rc-stars { display: flex; gap: 1px; }
 .rc-stars svg { width: 12px; height: 12px; fill: var(--color-gold); }
 .rc-stars svg.empty { fill: var(--color-line); }
+.rc-no-text { color: var(--text-muted); font-style: italic; }
+
+.rc-menu-wrap { position: absolute; top: .7rem; right: .6rem; }
+.rc-menu-btn {
+  width: 26px; height: 26px; border-radius: 50%;
+  display: flex; align-items: center; justify-content: center;
+  color: var(--text-muted); transition: background .15s var(--ease), color .15s var(--ease);
+}
+.rc-menu-btn:hover { background: var(--color-line); color: var(--text-primary); }
+.rc-menu-btn svg { width: 16px; height: 16px; }
+.rc-menu-dropdown {
+  display: none; position: absolute; top: 30px; right: 0; z-index: 20;
+  min-width: 120px; overflow: hidden;
+  background: var(--bg-elevated); border: 1px solid var(--glass-border);
+  border-radius: var(--radius-sm); box-shadow: var(--shadow-soft);
+}
+.rc-menu-dropdown.open { display: block; }
+.rc-menu-item {
+  display: block; width: 100%; text-align: left; padding: .6rem .9rem;
+  font-size: .82rem; color: var(--text-primary); font-family: var(--font-body);
+}
+.rc-menu-item:hover { background: var(--color-line); }
 
 </style>
 </head>
@@ -1145,14 +1173,23 @@ footer p{ color: var(--text-muted); font-size:.85rem; }
       <!-- Rate form -->
       <div class="rating-form" id="ratingForm">
         <div id="rfSignedIn" style="display:none;">
-          <div class="rf-row">
-            <img id="rfAvatar" src="" alt="" class="cf-avatar">
-            <div class="rf-star-input" id="rfStarInput"></div>
+          <div id="rfFormActive">
+            <div class="rf-row">
+              <img id="rfAvatar" src="" alt="" class="cf-avatar">
+              <div class="rf-star-input" id="rfStarInput"></div>
+            </div>
+            <textarea id="ratingInput" placeholder="A few words about the album… (optional)" maxlength="300" rows="2"></textarea>
+            <div class="cf-actions">
+              <span id="rfCharCount" class="cf-char">0 / 300</span>
+              <button class="btn btn-gold btn-sm" id="ratingSubmitBtn">Submit</button>
+            </div>
           </div>
-          <textarea id="ratingInput" placeholder="A few words about the album… (optional)" maxlength="300" rows="2"></textarea>
-          <div class="cf-actions">
-            <span id="rfCharCount" class="cf-char">0 / 300</span>
-            <button class="btn btn-gold btn-sm" id="ratingSubmitBtn">Submit</button>
+          <div id="rfFormDone" class="rf-done" style="display:none;">
+            <img id="rfDoneAvatar" src="" alt="" class="cf-avatar">
+            <div class="rf-done-body">
+              <div class="rc-stars" id="rfDoneStars"></div>
+              <p class="rf-done-hint">Thanks for rating our album — tap ⋮ on your feedback below to edit it anytime.</p>
+            </div>
           </div>
         </div>
         <div id="rfSignedOut" class="cf-signin-prompt">
@@ -1325,7 +1362,8 @@ const state = {
   slideshowOrder: [],
   slideshowPos: 0,
   ratings: [],               // [{id,uid,displayName,photoURL,stars,feedback,updatedAt}]
-  myRatingValue: 0
+  myRatingValue: 0,
+  editingRating: false
 };
 
 const $ = (sel, root = document) => root.querySelector(sel);
@@ -2266,15 +2304,20 @@ function renderRatingSummary() {
 function renderRatingsList() {
   const list = $("#ratingsList");
   if (!list) return;
-  const withFeedback = state.ratings.filter(r => r.feedback && r.feedback.trim());
-  if (!withFeedback.length) {
+  const myUid = state.user?.uid;
+  const cards = state.ratings.filter(r => (r.feedback && r.feedback.trim()) || r.uid === myUid);
+  if (!cards.length) {
     list.innerHTML = '<p class="comment-empty">No written feedback yet — be the first to share yours 🤍</p>';
     return;
   }
-  list.innerHTML = withFeedback.map(r => {
+  list.innerHTML = cards.map(r => {
     const ago = timeAgo(r.updatedAt?.toDate?.() || new Date());
+    const isMine = r.uid === myUid;
+    const feedbackHtml = (r.feedback && r.feedback.trim())
+      ? escapeHtml(r.feedback)
+      : (isMine ? '<span class="rc-no-text">No written note yet.</span>' : '');
     return `
-      <div class="rating-card">
+      <div class="rating-card" data-rating-id="${r.id}">
         <img class="comment-avatar" src="${r.photoURL || 'https://ui-avatars.com/api/?name=' + encodeURIComponent(r.displayName || '?') + '&background=D49AA3&color=fff'}" alt="${escapeHtml(r.displayName || '')}">
         <div class="comment-body">
           <div class="rc-meta">
@@ -2282,10 +2325,48 @@ function renderRatingsList() {
             <div class="rc-stars">${[1, 2, 3, 4, 5].map(i => starSvg(i <= r.stars ? "" : "empty")).join("")}</div>
             <span class="comment-time">${ago}</span>
           </div>
-          <p class="comment-text">${escapeHtml(r.feedback)}</p>
+          <p class="comment-text">${feedbackHtml}</p>
         </div>
+        ${isMine ? `
+        <div class="rc-menu-wrap">
+          <button class="rc-menu-btn" data-menu-toggle="${r.id}" aria-label="Options">
+            <svg viewBox="0 0 24 24" fill="currentColor"><circle cx="12" cy="5" r="1.8"/><circle cx="12" cy="12" r="1.8"/><circle cx="12" cy="19" r="1.8"/></svg>
+          </button>
+          <div class="rc-menu-dropdown" id="rcMenu-${r.id}">
+            <button class="rc-menu-item" data-edit-rating="${r.id}">Edit</button>
+          </div>
+        </div>` : ""}
       </div>`;
   }).join("");
+}
+
+function showRatingFormActive() {
+  const active = $("#rfFormActive"), done = $("#rfFormDone");
+  if (active) active.style.display = "block";
+  if (done) done.style.display = "none";
+}
+function showRatingFormDone(mine) {
+  const active = $("#rfFormActive"), done = $("#rfFormDone");
+  if (active) active.style.display = "none";
+  if (done) done.style.display = "flex";
+  const av = $("#rfDoneAvatar");
+  if (av) { av.src = state.user?.photoURL || ''; av.alt = state.user?.displayName || ''; }
+  const starsEl = $("#rfDoneStars");
+  if (starsEl) starsEl.innerHTML = [1, 2, 3, 4, 5].map(i => starSvg(i <= (mine.stars || 0) ? "" : "empty")).join("");
+}
+
+function openRatingEditor(r) {
+  state.editingRating = true;
+  state.myRatingValue = r.stars || 0;
+  renderStarInput(state.myRatingValue);
+  const ri = $("#ratingInput");
+  if (ri) {
+    ri.value = r.feedback || "";
+    const cc = $("#rfCharCount");
+    if (cc) cc.textContent = ri.value.length + " / 300";
+  }
+  showRatingFormActive();
+  $("#ratingSection")?.scrollIntoView({ behavior: "smooth", block: "start" });
 }
 
 function updateRatingFormAuth() {
@@ -2299,20 +2380,24 @@ function updateRatingFormAuth() {
     if (av) { av.src = state.user.photoURL || ''; av.alt = state.user.displayName || ''; }
 
     const mine = state.ratings.find(r => r.uid === state.user.uid);
-    state.myRatingValue = mine ? mine.stars : 0;
-    renderStarInput(state.myRatingValue);
 
-    const ri = $("#ratingInput");
-    if (ri && document.activeElement !== ri) {
-      ri.value = mine?.feedback || "";
+    if (state.editingRating) {
+      showRatingFormActive();
+    } else if (mine) {
+      showRatingFormDone(mine);
+    } else {
+      showRatingFormActive();
+      state.myRatingValue = 0;
+      renderStarInput(0);
+      const ri = $("#ratingInput");
+      if (ri) ri.value = "";
       const cc = $("#rfCharCount");
-      if (cc) cc.textContent = ri.value.length + " / 300";
+      if (cc) cc.textContent = "0 / 300";
     }
-    const btn = $("#ratingSubmitBtn");
-    if (btn) btn.textContent = mine ? "Update" : "Submit";
   } else {
     signedIn.style.display = "none";
     signedOut.style.display = "flex";
+    state.editingRating = false;
   }
 }
 
@@ -2331,12 +2416,38 @@ $("#ratingInput")?.addEventListener("input", function () {
   if (cc) cc.textContent = n + " / 300";
 });
 
+// 3-dot menu on a feedback card: toggle open, or open the editor
+$("#ratingsList")?.addEventListener("click", (e) => {
+  const toggleBtn = e.target.closest("[data-menu-toggle]");
+  if (toggleBtn) {
+    const id = toggleBtn.dataset.menuToggle;
+    const dropdown = $(`#rcMenu-${id}`);
+    $$(".rc-menu-dropdown.open").forEach(d => { if (d !== dropdown) d.classList.remove("open"); });
+    dropdown?.classList.toggle("open");
+    return;
+  }
+  const editBtn = e.target.closest("[data-edit-rating]");
+  if (editBtn) {
+    const id = editBtn.dataset.editRating;
+    const r = state.ratings.find(x => x.id === id);
+    $$(".rc-menu-dropdown.open").forEach(d => d.classList.remove("open"));
+    if (r) openRatingEditor(r);
+  }
+});
+// Close any open dropdown when clicking elsewhere
+document.addEventListener("click", (e) => {
+  if (!e.target.closest(".rc-menu-wrap")) {
+    $$(".rc-menu-dropdown.open").forEach(d => d.classList.remove("open"));
+  }
+});
+
 // Submit / update rating
 $("#ratingSubmitBtn")?.addEventListener("click", async () => {
   if (!state.user) return;
   if (!state.myRatingValue) { toast("Please pick a star rating first"); return; }
 
   const btn = $("#ratingSubmitBtn");
+  const originalLabel = btn.textContent;
   btn.textContent = "Submitting…";
   btn.disabled = true;
   try {
@@ -2348,11 +2459,13 @@ $("#ratingSubmitBtn")?.addEventListener("click", async () => {
       feedback: $("#ratingInput")?.value.trim() || "",
       updatedAt: serverTimestamp()
     }, { merge: true });
+    state.editingRating = false; // switch back to the "already rated" view once saved
     toast("Thank you for your feedback 🤍");
   } catch (e) {
     console.error(e);
     toast("Couldn't submit — please try again");
   } finally {
+    btn.textContent = originalLabel;
     btn.disabled = false;
   }
 });
